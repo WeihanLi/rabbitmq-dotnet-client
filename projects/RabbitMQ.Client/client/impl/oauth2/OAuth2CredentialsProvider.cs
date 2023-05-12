@@ -94,8 +94,8 @@ namespace RabbitMQ.Client.Impl.OAuth2
         {
             _lock.AcquireReaderLock(TOKEN_RETRIEVAL_TIMEOUT);
             try
-            {               
-                if (_token != null) 
+            {
+                if (_token != null)
                 {
                     return _token;
                 }
@@ -104,7 +104,7 @@ namespace RabbitMQ.Client.Impl.OAuth2
             {
                 _lock.ReleaseReaderLock();
             }
-            
+
             return retrieveToken();
         }
 
