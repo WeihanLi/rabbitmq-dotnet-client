@@ -48,14 +48,10 @@ namespace RabbitMQ.Client
         public string VirtualHost { get; }
 
         /// <summary>
-        /// Username to use when authenticating to the server.
+        /// Default CredentialsProvider implementation
         /// </summary>
-        public string UserName { get; }
-
-        /// <summary>
-        /// Password to use when authenticating to the server.
-        /// </summary>
-        public string Password { get; internal set; }
+        public ICredentialsProvider CredentialsProvider;
+        public ICredentialsRefresher CredentialsRefresher;
 
         /// <summary>
         ///  SASL auth mechanisms to use.
@@ -136,7 +132,8 @@ namespace RabbitMQ.Client
 
         internal Func<AmqpTcpEndpoint, IFrameHandler> FrameHandlerFactory { get; }
 
-        internal ConnectionConfig(string virtualHost, string userName, string password, IList<IAuthMechanismFactory> authMechanisms,
+        internal ConnectionConfig(string virtualHost, ICredentialsProvider credentialsProvider, ICredentialsRefresher credentialsRefresher,
+            IList<IAuthMechanismFactory> authMechanisms,
             IDictionary<string, object?> clientProperties, string? clientProvidedName,
             ushort maxChannelCount, uint maxFrameSize, bool topologyRecoveryEnabled,
             TopologyRecoveryFilter topologyRecoveryFilter, TopologyRecoveryExceptionHandler topologyRecoveryExceptionHandler,
@@ -145,8 +142,8 @@ namespace RabbitMQ.Client
             Func<AmqpTcpEndpoint, IFrameHandler> frameHandlerFactory)
         {
             VirtualHost = virtualHost;
-            UserName = userName;
-            Password = password;
+            CredentialsProvider = credentialsProvider;
+            CredentialsRefresher = credentialsRefresher;
             AuthMechanisms = authMechanisms;
             ClientProperties = clientProperties;
             ClientProvidedName = clientProvidedName;

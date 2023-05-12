@@ -29,16 +29,29 @@
 //  Copyright (c) 2007-2020 VMware, Inc.  All rights reserved.
 //---------------------------------------------------------------------------
 
-using System.Text;
+using System;
 
 namespace RabbitMQ.Client
 {
-    public class PlainMechanism : IAuthMechanism
+    public interface ICredentialsProvider
     {
-        public byte[] handleChallenge(byte[] challenge, ConnectionConfig config)
-        {
+        string Name { get; }
+        string Username { get; }
+        string Password { get; }
 
-            return Encoding.UTF8.GetBytes($"\0{config.CredentialsProvider.Username}\0{config.CredentialsProvider.Password}");
-        }
+        /**
+            If credentials have an expiry time this property 
+            returns the interval. Else it returns null.
+        */
+        Nullable<System.TimeSpan> ValidUntil { get; }
+
+        /** <Summary>
+            Before the credentials are available, be it Username, Password
+            or ValidUntil, the credentials must be obtained by calling this
+            method. And to keep it up to date, this method must be called 
+            before the ValidUntil interval.
+            </Summary>
+        */
+        void Refresh();
     }
 }

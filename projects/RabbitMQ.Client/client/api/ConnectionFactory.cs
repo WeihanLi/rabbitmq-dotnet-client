@@ -160,6 +160,8 @@ namespace RabbitMQ.Client
         /// </summary>
         public static System.Net.Sockets.AddressFamily DefaultAddressFamily { get; set; }
 
+        public static readonly ICredentialsRefresher DefaultCredentialsRefresher = new NoOpCredentialsRefresher();
+
         /// <summary>
         /// Set to false to disable automatic connection recovery.
         /// Defaults to true.
@@ -270,6 +272,7 @@ namespace RabbitMQ.Client
         /// </summary>
         public TopologyRecoveryExceptionHandler TopologyRecoveryExceptionHandler { get; set; } = new TopologyRecoveryExceptionHandler();
 
+
         /// <summary>
         /// Construct a fresh instance, with all fields set to their respective defaults.
         /// </summary>
@@ -331,6 +334,13 @@ namespace RabbitMQ.Client
         /// Username to use when authenticating to the server.
         /// </summary>
         public string UserName { get; set; } = DefaultUser;
+
+        /// <summary>
+        /// CredemtialsProvider used to obtain username and pasword.
+        /// </summary>
+        public ICredentialsProvider CredentialsProvider { get; set; }
+
+        public ICredentialsRefresher CredentialsRefresher { get; set; } = DefaultCredentialsRefresher;
 
         /// <summary>
         /// Virtual host to access during this connection.
@@ -538,8 +548,8 @@ namespace RabbitMQ.Client
         {
             return new ConnectionConfig(
                 VirtualHost,
-                UserName,
-                Password,
+                GetCredentialsProvider(),
+                CredentialsRefresher,
                 AuthMechanisms,
                 ClientProperties,
                 clientProvidedName,
@@ -557,7 +567,17 @@ namespace RabbitMQ.Client
                 ConsumerDispatchConcurrency,
                 CreateFrameHandler);
         }
-
+        internal ICredentialsProvider GetCredentialsProvider()
+        {
+            if (CredentialsProvider != null)
+            {
+                return CredentialsProvider;
+            }
+            else
+            {
+                return new BasicCredentialsProvider(ClientProvidedName, UserName, Password);
+            }
+        }
         internal IFrameHandler CreateFrameHandler(AmqpTcpEndpoint endpoint)
         {
             IFrameHandler fh = new SocketFrameHandler(endpoint, SocketFactory, RequestedConnectionTimeout, SocketReadTimeout, SocketWriteTimeout);

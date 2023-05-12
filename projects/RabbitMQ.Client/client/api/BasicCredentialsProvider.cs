@@ -29,16 +29,31 @@
 //  Copyright (c) 2007-2020 VMware, Inc.  All rights reserved.
 //---------------------------------------------------------------------------
 
-using System.Text;
+using System;
 
 namespace RabbitMQ.Client
 {
-    public class PlainMechanism : IAuthMechanism
+    public class BasicCredentialsProvider : ICredentialsProvider
     {
-        public byte[] handleChallenge(byte[] challenge, ConnectionConfig config)
+        public string Name { get; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public Nullable<TimeSpan> ValidUntil
+        {
+            get
+            {
+                return null;
+            }
+        }
+        public BasicCredentialsProvider(string Name, string Username, string Password)
+        {
+            this.Name = Name;
+            this.Username = Username;
+            this.Password = Password;
+        }
+        public void Refresh()
         {
 
-            return Encoding.UTF8.GetBytes($"\0{config.CredentialsProvider.Username}\0{config.CredentialsProvider.Password}");
         }
     }
 }
