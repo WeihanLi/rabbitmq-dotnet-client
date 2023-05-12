@@ -61,11 +61,12 @@ namespace RabbitMQ.Client.Unit
             Assert.Equal("the_access_token", _provider.Password);
         }
         [Fact]
-        public void ShouldNotRequestTokenUntilCallingRefresh()
+        public void ShouldRequestTokenWhenGettingPasswordOrValidUntilForFirstTimeAccess()
         {
-            Assert.Throws<System.InvalidOperationException>(() => _provider.Password);
-            Assert.Throws<System.InvalidOperationException>(() => _provider.Username);
-            Assert.Throws<System.InvalidOperationException>(() => _provider.ValidUntil);
+            IToken firstToken = newToken("the_access_token", "the_refresh_token", 1);
+            _oAuth2Client.Setup(p => p.RequestToken()).Returns(firstToken);
+            Assert.Equal(firstToken.AccessToken, _provider.Password);
+            Assert.Equal(firstToken.ExpiresIn, _provider.ValidUntil.Value.TotalSeconds);
         }
 
         [Fact]
