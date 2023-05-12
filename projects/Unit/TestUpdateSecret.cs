@@ -40,29 +40,11 @@ namespace RabbitMQ.Client.Unit
         public TestUpdateSecret(ITestOutputHelper output) : base(output)
         {
         }
-        private string _username = "myuser";
-
-        protected override void SetUp()
-        {
-            RabbitMQCtl.AddUser(_username, "mypassword");
-            RabbitMQCtl.SetPermissions(_username, ".*", ".*", ".*");
-        }
-        public override void Dispose()
-        {
-            RabbitMQCtl.DeleteUser(_username);
-        }
 
         [IgnoreOnVersionsEarlierThan(3, 8)]
         public void TestUpdatingConnectionSecret()
         {
-            using (_conn = ConnectWithCredentials(_username, "mypassword"))
-            {
-                _conn.UpdateSecret("new-secret", "Test Case");
-            }
-        }
-        private IConnection ConnectWithCredentials(string username, string password)
-        {
-            return CreateAutorecoveringConnection(new BasicCredentialsProvider("TestUpdateSecret", username, password));
+            _conn.UpdateSecret("new-secret", "Test Case");
         }
 
     }
