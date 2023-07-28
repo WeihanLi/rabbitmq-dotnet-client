@@ -277,6 +277,16 @@ namespace RabbitMQ.Client
         void ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments);
 
         /// <summary>
+        /// Asynchronously binds an exchange to an exchange.
+        /// </summary>
+        /// <remarks>
+        ///   <para>
+        ///     Routing key must be shorter than 255 bytes.
+        ///   </para>
+        /// </remarks>
+        ValueTask ExchangeBindAsync(string destination, string source, string routingKey, IDictionary<string, object> arguments);
+
+        /// <summary>
         /// Like ExchangeBind but sets nowait to true.
         /// </summary>
         /// <remarks>
