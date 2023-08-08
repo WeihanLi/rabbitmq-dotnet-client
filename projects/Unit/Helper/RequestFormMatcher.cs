@@ -44,7 +44,8 @@ namespace RabbitMQ.Client.Unit
             _expected[key] = value;
             return this;
         }
-        public Func<string?, bool> Matcher()
+
+        public Func<string, bool> Matcher()
         {
             return (body) =>
             {
@@ -58,8 +59,5 @@ namespace RabbitMQ.Client.Unit
                 return true;
             };
         }
-
     }
-
 }
-

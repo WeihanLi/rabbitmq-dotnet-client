@@ -272,7 +272,6 @@ namespace RabbitMQ.Client
         /// </summary>
         public TopologyRecoveryExceptionHandler TopologyRecoveryExceptionHandler { get; set; } = new TopologyRecoveryExceptionHandler();
 
-
         /// <summary>
         /// Construct a fresh instance, with all fields set to their respective defaults.
         /// </summary>
@@ -311,9 +310,24 @@ namespace RabbitMQ.Client
         };
 
         /// <summary>
+        /// Username to use when authenticating to the server.
+        /// </summary>
+        public string UserName { get; set; } = DefaultUser;
+
+        /// <summary>
         /// Password to use when authenticating to the server.
         /// </summary>
         public string Password { get; set; } = DefaultPass;
+
+        /// <summary>
+        /// CredemtialsProvider used to obtain username and pasword.
+        /// </summary>
+        public ICredentialsProvider CredentialsProvider { get; set; }
+
+        /// <summary>
+        /// Used to refresh credentials.
+        /// </summary>
+        public ICredentialsRefresher CredentialsRefresher { get; set; } = DefaultCredentialsRefresher;
 
         /// <summary>
         /// Maximum channel number to ask for.
@@ -329,18 +343,6 @@ namespace RabbitMQ.Client
         /// Heartbeat timeout to use when negotiating with the server.
         /// </summary>
         public TimeSpan RequestedHeartbeat { get; set; } = DefaultHeartbeat;
-
-        /// <summary>
-        /// Username to use when authenticating to the server.
-        /// </summary>
-        public string UserName { get; set; } = DefaultUser;
-
-        /// <summary>
-        /// CredemtialsProvider used to obtain username and pasword.
-        /// </summary>
-        public ICredentialsProvider CredentialsProvider { get; set; }
-
-        public ICredentialsRefresher CredentialsRefresher { get; set; } = DefaultCredentialsRefresher;
 
         /// <summary>
         /// Virtual host to access during this connection.
@@ -548,7 +550,9 @@ namespace RabbitMQ.Client
         {
             return new ConnectionConfig(
                 VirtualHost,
-                GetCredentialsProvider(),
+                UserName,
+                Password,
+                CredentialsProvider,
                 CredentialsRefresher,
                 AuthMechanisms,
                 ClientProperties,
@@ -567,17 +571,7 @@ namespace RabbitMQ.Client
                 ConsumerDispatchConcurrency,
                 CreateFrameHandler);
         }
-        internal ICredentialsProvider GetCredentialsProvider()
-        {
-            if (CredentialsProvider != null)
-            {
-                return CredentialsProvider;
-            }
-            else
-            {
-                return new BasicCredentialsProvider(ClientProvidedName, UserName, Password);
-            }
-        }
+
         internal IFrameHandler CreateFrameHandler(AmqpTcpEndpoint endpoint)
         {
             IFrameHandler fh = new SocketFrameHandler(endpoint, SocketFactory, RequestedConnectionTimeout, SocketReadTimeout, SocketWriteTimeout);

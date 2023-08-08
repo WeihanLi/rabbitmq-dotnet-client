@@ -35,9 +35,29 @@ namespace RabbitMQ.Client
 {
     public class BasicCredentialsProvider : ICredentialsProvider
     {
-        public string Name { get; }
-        public string Username { get; set; }
+        private readonly string _name;
+        private readonly string _userName;
+        private readonly string _password;
+
+        public BasicCredentialsProvider(string name, string userName, string password)
+        {
+            _name = name ?? throw new ArgumentNullException(nameof(name));
+            _userName = userName ?? throw new ArgumentNullException(nameof(userName));
+            _password = password ?? throw new ArgumentNullException(nameof(password));
+        }
+
+        public string Name
+        {
+            get { return _userName; }
+        }
+
+        public string UserName
+        {
+            get { return _userName; }
+        }
+
         public string Password { get; set; }
+
         public Nullable<TimeSpan> ValidUntil
         {
             get
@@ -45,15 +65,9 @@ namespace RabbitMQ.Client
                 return null;
             }
         }
-        public BasicCredentialsProvider(string Name, string Username, string Password)
-        {
-            this.Name = Name;
-            this.Username = Username;
-            this.Password = Password;
-        }
+
         public void Refresh()
         {
-
         }
     }
 }

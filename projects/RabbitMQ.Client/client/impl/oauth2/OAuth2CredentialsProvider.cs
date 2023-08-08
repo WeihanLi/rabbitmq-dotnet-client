@@ -39,14 +39,14 @@ namespace RabbitMQ.Client.Impl.OAuth2
         const int TOKEN_RETRIEVAL_TIMEOUT = 5000;
         private ReaderWriterLock _lock = new ReaderWriterLock();
 
-        private string _name;
+        private readonly string _name;
+        private readonly IOAuth2Client _oAuth2Client;
         private IToken _token;
-        private IOAuth2Client _oAuth2Client;
 
         public OAuth2ClientCredentialsProvider(string name, IOAuth2Client oAuth2Client)
         {
-            this._name = name;
-            this._oAuth2Client = oAuth2Client;
+            _name = name ?? throw new ArgumentNullException(nameof(name));
+            _oAuth2Client = oAuth2Client ?? throw new ArgumentNullException(nameof(oAuth2Client));
         }
 
         public string Name
@@ -56,14 +56,16 @@ namespace RabbitMQ.Client.Impl.OAuth2
                 return _name;
             }
         }
-        public string Username
+
+        public string UserName
         {
             get
             {
                 checkState();
-                return "";
+                return string.Empty;
             }
         }
+
         public string Password
         {
             get
@@ -71,6 +73,7 @@ namespace RabbitMQ.Client.Impl.OAuth2
                 return checkState().AccessToken;
             }
         }
+
         public Nullable<TimeSpan> ValidUntil
         {
             get
@@ -86,10 +89,12 @@ namespace RabbitMQ.Client.Impl.OAuth2
                 }
             }
         }
+
         public void Refresh()
         {
             retrieveToken();
         }
+
         private IToken checkState()
         {
             _lock.AcquireReaderLock(TOKEN_RETRIEVAL_TIMEOUT);
@@ -133,8 +138,5 @@ namespace RabbitMQ.Client.Impl.OAuth2
             }
             return _token;
         }
-
     }
-
-
 }

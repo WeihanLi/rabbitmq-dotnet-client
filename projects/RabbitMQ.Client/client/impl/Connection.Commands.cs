@@ -173,6 +173,7 @@ namespace RabbitMQ.Client.Framing.Impl
                 _config.CredentialsRefresher.register(_config.CredentialsProvider, NotifyCredentialRefreshed);
             }
         }
+
         private void NotifyCredentialRefreshed(bool succesfully)
         {
             if (succesfully)
@@ -180,6 +181,7 @@ namespace RabbitMQ.Client.Framing.Impl
                 UpdateSecret(_config.CredentialsProvider.Password, "Token refresh");
             }
         }
+
         private IAuthMechanismFactory GetAuthMechanismFactory(string supportedMechanismNames)
         {
             // Our list is in order of preference, the server one is not.

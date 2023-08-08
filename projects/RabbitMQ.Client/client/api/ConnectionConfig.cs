@@ -36,7 +36,6 @@ using RabbitMQ.Client.Impl;
 
 namespace RabbitMQ.Client
 {
-#nullable enable
     /// <summary>
     /// The configuration of a connection.
     /// </summary>
@@ -48,7 +47,18 @@ namespace RabbitMQ.Client
         public string VirtualHost { get; }
 
         /// <summary>
-        /// Default CredentialsProvider implementation
+        /// Username to use when authenticating to the server.
+        /// </summary>
+        public string UserName { get; }
+
+        /// <summary>
+        /// Password to use when authenticating to the server.
+        /// </summary>
+        public string Password { get; }
+
+        /// <summary>
+        /// Default CredentialsProvider implementation. If set, this
+        /// overrides UserName / Password
         /// </summary>
         public ICredentialsProvider CredentialsProvider;
         public ICredentialsRefresher CredentialsRefresher;
@@ -61,17 +71,18 @@ namespace RabbitMQ.Client
         /// <summary>
         /// Dictionary of client properties to be sent to the server.
         /// </summary>
-        public IDictionary<string, object?> ClientProperties { get; }
+        public IDictionary<string, object> ClientProperties { get; }
 
         /// <summary>
         /// Default client provided name to be used for connections.
         /// </summary>
-        public string? ClientProvidedName { get; }
+        public string ClientProvidedName { get; }
 
         /// <summary>
         /// Maximum channel number to ask for.
         /// </summary>
         public ushort MaxChannelCount { get; }
+
         /// <summary>
         /// Frame-max parameter to ask for (in bytes).
         /// </summary>
@@ -132,9 +143,10 @@ namespace RabbitMQ.Client
 
         internal Func<AmqpTcpEndpoint, IFrameHandler> FrameHandlerFactory { get; }
 
-        internal ConnectionConfig(string virtualHost, ICredentialsProvider credentialsProvider, ICredentialsRefresher credentialsRefresher,
+        internal ConnectionConfig(string virtualHost, string userName, string password,
+            ICredentialsProvider credentialsProvider, ICredentialsRefresher credentialsRefresher,
             IList<IAuthMechanismFactory> authMechanisms,
-            IDictionary<string, object?> clientProperties, string? clientProvidedName,
+            IDictionary<string, object> clientProperties, string clientProvidedName,
             ushort maxChannelCount, uint maxFrameSize, bool topologyRecoveryEnabled,
             TopologyRecoveryFilter topologyRecoveryFilter, TopologyRecoveryExceptionHandler topologyRecoveryExceptionHandler,
             TimeSpan networkRecoveryInterval, TimeSpan heartbeatInterval, TimeSpan continuationTimeout, TimeSpan handshakeContinuationTimeout, TimeSpan requestedConnectionTimeout,
@@ -142,7 +154,7 @@ namespace RabbitMQ.Client
             Func<AmqpTcpEndpoint, IFrameHandler> frameHandlerFactory)
         {
             VirtualHost = virtualHost;
-            CredentialsProvider = credentialsProvider;
+            CredentialsProvider = credentialsProvider ?? new BasicCredentialsProvider(clientProvidedName, userName, password);
             CredentialsRefresher = credentialsRefresher;
             AuthMechanisms = authMechanisms;
             ClientProperties = clientProperties;

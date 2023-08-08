@@ -37,8 +37,7 @@ namespace RabbitMQ.Client
     {
         public byte[] handleChallenge(byte[] challenge, ConnectionConfig config)
         {
-
-            return Encoding.UTF8.GetBytes($"\0{config.CredentialsProvider.Username}\0{config.CredentialsProvider.Password}");
+            return Encoding.UTF8.GetBytes($"\0{config.CredentialsProvider.UserName}\0{config.CredentialsProvider.Password}");
         }
     }
 }
