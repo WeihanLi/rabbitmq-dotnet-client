@@ -48,7 +48,7 @@ namespace RabbitMQ.Client
 
         public string Name
         {
-            get { return _userName; }
+            get { return _name; }
         }
 
         public string UserName
@@ -56,7 +56,10 @@ namespace RabbitMQ.Client
             get { return _userName; }
         }
 
-        public string Password { get; set; }
+        public string Password
+        {
+            get { return _password; }
+        }
 
         public Nullable<TimeSpan> ValidUntil
         {

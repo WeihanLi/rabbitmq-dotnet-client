@@ -57,7 +57,7 @@ namespace RabbitMQ.Client
     {
         public BasicCredentialsProvider(string name, string userName, string password) { }
         public string Name { get; }
-        public string Password { get; set; }
+        public string Password { get; }
         public string UserName { get; }
         public System.TimeSpan? ValidUntil { get; }
         public void Refresh() { }
