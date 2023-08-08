@@ -36,6 +36,7 @@ using RabbitMQ.Client.Impl;
 
 namespace RabbitMQ.Client
 {
+#nullable enable
     /// <summary>
     /// The configuration of a connection.
     /// </summary>
@@ -71,12 +72,12 @@ namespace RabbitMQ.Client
         /// <summary>
         /// Dictionary of client properties to be sent to the server.
         /// </summary>
-        public IDictionary<string, object> ClientProperties { get; }
+        public IDictionary<string, object?> ClientProperties { get; }
 
         /// <summary>
         /// Default client provided name to be used for connections.
         /// </summary>
-        public string ClientProvidedName { get; }
+        public string? ClientProvidedName { get; }
 
         /// <summary>
         /// Maximum channel number to ask for.
@@ -146,7 +147,7 @@ namespace RabbitMQ.Client
         internal ConnectionConfig(string virtualHost, string userName, string password,
             ICredentialsProvider credentialsProvider, ICredentialsRefresher credentialsRefresher,
             IList<IAuthMechanismFactory> authMechanisms,
-            IDictionary<string, object> clientProperties, string clientProvidedName,
+            IDictionary<string, object?> clientProperties, string? clientProvidedName,
             ushort maxChannelCount, uint maxFrameSize, bool topologyRecoveryEnabled,
             TopologyRecoveryFilter topologyRecoveryFilter, TopologyRecoveryExceptionHandler topologyRecoveryExceptionHandler,
             TimeSpan networkRecoveryInterval, TimeSpan heartbeatInterval, TimeSpan continuationTimeout, TimeSpan handshakeContinuationTimeout, TimeSpan requestedConnectionTimeout,
@@ -154,6 +155,8 @@ namespace RabbitMQ.Client
             Func<AmqpTcpEndpoint, IFrameHandler> frameHandlerFactory)
         {
             VirtualHost = virtualHost;
+            UserName = userName;
+            Password = password;
             CredentialsProvider = credentialsProvider ?? new BasicCredentialsProvider(clientProvidedName, userName, password);
             CredentialsRefresher = credentialsRefresher;
             AuthMechanisms = authMechanisms;

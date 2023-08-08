@@ -55,10 +55,10 @@ namespace RabbitMQ.Client
     }
     public class BasicCredentialsProvider : RabbitMQ.Client.ICredentialsProvider
     {
-        public BasicCredentialsProvider(string Name, string Username, string Password) { }
+        public BasicCredentialsProvider(string name, string userName, string password) { }
         public string Name { get; }
         public string Password { get; set; }
-        public string Username { get; set; }
+        public string UserName { get; }
         public System.TimeSpan? ValidUntil { get; }
         public void Refresh() { }
     }
@@ -153,10 +153,12 @@ namespace RabbitMQ.Client
         public ushort MaxChannelCount { get; }
         public uint MaxFrameSize { get; }
         public System.TimeSpan NetworkRecoveryInterval { get; }
+        public string Password { get; }
         public System.TimeSpan RequestedConnectionTimeout { get; }
         public bool TopologyRecoveryEnabled { get; }
         public RabbitMQ.Client.TopologyRecoveryExceptionHandler TopologyRecoveryExceptionHandler { get; }
         public RabbitMQ.Client.TopologyRecoveryFilter TopologyRecoveryFilter { get; }
+        public string UserName { get; }
         public string VirtualHost { get; }
     }
     public sealed class ConnectionFactory : RabbitMQ.Client.ConnectionFactoryBase, RabbitMQ.Client.IConnectionFactory
@@ -547,7 +549,7 @@ namespace RabbitMQ.Client
     {
         string Name { get; }
         string Password { get; }
-        string Username { get; }
+        string UserName { get; }
         System.TimeSpan? ValidUntil { get; }
         void Refresh();
     }
@@ -1072,7 +1074,7 @@ namespace RabbitMQ.Client.Impl.OAuth2
         public OAuth2ClientCredentialsProvider(string name, RabbitMQ.Client.Impl.OAuth2.IOAuth2Client oAuth2Client) { }
         public string Name { get; }
         public string Password { get; }
-        public string Username { get; }
+        public string UserName { get; }
         public System.TimeSpan? ValidUntil { get; }
         public void Refresh() { }
     }
