@@ -9,4 +9,4 @@ readonly script_dir
 
 source "$script_dir/common.sh"
 
-docker_stop keycloak
+docker_stop uaa

@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
 
-set -x
+set -o errexit
+set -o nounset
+set -o pipefail
 
-SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly mode=${MODE:-keycloak}
+readonly client_id=producer
 
-MODE=${MODE:-keycloak}
-CLIENT_ID=producer
-
-if [ $MODE == "keycloak" ]
+if [[ $mode == keycloak ]]
 then
-  CLIENT_SECRET=kbOFBXI9tANgKUq8vXHLhT6YhbivgXxn
-  TOKEN_ENDPOINT="http://localhost:8080/realms/test/protocol/openid-connect/token"
-  SCOPE="rabbitmq:configure:*/* rabbitmq:read:*/* rabbitmq:write:*/*"
+  readonly client_secret=kbOFBXI9tANgKUq8vXHLhT6YhbivgXxn
+  readonly token_endpoint="http://localhost:8080/realms/test/protocol/openid-connect/token"
+  readonly scope="rabbitmq:configure:*/* rabbitmq:read:*/* rabbitmq:write:*/*"
 else
-  CLIENT_SECRET=producer_secret
-  TOKEN_ENDPOINT="http://localhost:8080/oauth/token"
-  SCOPE=""
+  readonly client_secret=producer_secret
+  readonly token_endpoint="http://localhost:8080/oauth/token"
+  readonly scope=""
 fi
 
-dotnet run --Name $MODE \
-  --ClientId $CLIENT_ID \
-  --ClientSecret $CLIENT_SECRET \
-  --Scope "$SCOPE" \
-  --TokenEndpoint $TOKEN_ENDPOINT \
-  --TokenExpiresInSeconds 60
+dotnet run --Name "$mode" \
+    --ClientId "$client_id" \
+    --ClientSecret "$client_secret" \
+    --Scope "$scope" \
+    --TokenEndpoint "$token_endpoint" \
+    --TokenExpiresInSeconds 60

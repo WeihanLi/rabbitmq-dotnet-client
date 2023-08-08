@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+set -o errexit
+set -o nounset
+set -o pipefail
 
-docker kill rabbitmq
-docker rm rabbitmq
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly script_dir
+
+source "$script_dir/common.sh"
+
+docker_stop rabbitmq
