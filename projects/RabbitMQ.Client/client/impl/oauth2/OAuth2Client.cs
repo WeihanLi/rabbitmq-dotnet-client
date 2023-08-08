@@ -44,6 +44,7 @@ namespace RabbitMQ.Client.Impl.OAuth2
         public IToken RefreshToken(IToken token);
 
     }
+
     public interface IToken
     {
         public string AccessToken { get; }
