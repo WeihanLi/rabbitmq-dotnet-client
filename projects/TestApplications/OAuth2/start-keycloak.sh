@@ -18,15 +18,13 @@ echo "[INFO] running $docker_name docker image ..."
 readonly signing_key_file="$script_dir/keycloak/signing-key/signing-key.pem"
 if [[ -f $signing_key_file ]]
 then
-    OAUTH2_RABBITMQ_EXTRA_MOUNTS="${OAUTH2_RABBITMQ_EXTRA_MOUNTS:-} -v $signing_key_file:/etc/rabbitmq/signing-key.pem"
+    OAUTH2_RABBITMQ_EXTRA_MOUNTS="${OAUTH2_RABBITMQ_EXTRA_MOUNTS:-} --volume $signing_key_file:/etc/rabbitmq/signing-key.pem"
 fi
 
 # Note:
 # Variables left un-quoted so that words are actually split as args
 # shellcheck disable=SC2086
-docker run \
-    --detach \
-    --name "$docker_name" --net rabbitmq_net \
+docker run --detach --name "$docker_name" --net rabbitmq_net \
     --publish 8080:8080 \
     --env KEYCLOAK_ADMIN=admin \
     --env KEYCLOAK_ADMIN_PASSWORD=admin \

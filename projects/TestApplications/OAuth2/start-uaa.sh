@@ -15,12 +15,11 @@ readonly uaa_image_tag=${UAA_IMAGE_TAG:-75.21.0}
 readonly uaa_image_name=${UAA_IMAGE_NAME:-cloudfoundry/uaa}
 
 docker network inspect rabbitmq_net >/dev/null 2>&1 || docker network create rabbitmq_net
-docker rm -f uaa 2>/dev/null || echo "[INFO] uaa was not running"
+docker rm --force "$docker_name" 2>/dev/null || echo "[INFO] $docker_name was not running"
 
 echo "[INFO] running ${uaa_image_name}:${uaa_image_tag} docker image"
 
-docker run --detach \
-    --name "$docker_name" --net rabbitmq_net \
+docker run --detach --name "$docker_name" --net rabbitmq_net \
     --publish 8080:8080 \
     --mount "type=bind,source=${script_dir}/uaa,target=/uaa" \
     --env UAA_CONFIG_PATH="/uaa" \

@@ -10,6 +10,7 @@ namespace OAuth2
     {
         private static string _exchange = "test_direct";
         private static AutoResetEvent? _doneEvent;
+
         public class OAuth2Options
         {
             public string? Name { get; set; }
@@ -17,9 +18,7 @@ namespace OAuth2
             public string? ClientSecret { get; set; }
             public string? Scope { get; set; }
             public string? TokenEndpoint { get; set; }
-
             public int TokenExpiresInSeconds { get; set; }
-
         }
 
         public static void Main(string[] args)
@@ -30,14 +29,13 @@ namespace OAuth2
                 .AddCommandLine(args)
                 .Build();
 
-
             _doneEvent = new AutoResetEvent(false);
+
             OAuth2Options? oauth2Options = configuration.Get<OAuth2Options>();
             if (oauth2Options == null)
             {
                 throw new ArgumentException("There are no OAuth2 Options");
             }
-
 
             var connectionFactory = new ConnectionFactory
             {
@@ -45,25 +43,29 @@ namespace OAuth2
                 CredentialsProvider = GetCredentialsProvider(oauth2Options),
                 CredentialsRefresher = GetCredentialsRefresher()
             };
-            var connection = connectionFactory.CreateConnection();
 
-            IChannel publisher = declarePublisher(connection);
-            IChannel subscriber = declareConsumer(connection);
-            publish(publisher);
-            consume(subscriber);
-            if (oauth2Options.TokenExpiresInSeconds > 0)
+            using (IConnection connection = connectionFactory.CreateConnection())
             {
-                for (int i = 0; i < 4; i++)
+                using (IChannel publisher = declarePublisher(connection))
+                using (IChannel subscriber = declareConsumer(connection))
                 {
-                    Console.WriteLine("Wait until Token expires. Attempt #" + (i + 1));
-                    System.Threading.Thread.Sleep((oauth2Options.TokenExpiresInSeconds + 10) * 1000);
-                    Console.WriteLine("Resuming ..");
-                    publish(publisher);
-                    _doneEvent.Reset();
-                    consume(subscriber);
+                    Publish(publisher);
+                    Consume(subscriber);
+
+                    if (oauth2Options.TokenExpiresInSeconds > 0)
+                    {
+                        for (int i = 0; i < 4; i++)
+                        {
+                            Console.WriteLine("Wait until Token expires. Attempt #" + (i + 1));
+                            Thread.Sleep((oauth2Options.TokenExpiresInSeconds + 10) * 1000);
+                            Console.WriteLine("Resuming ..");
+                            Publish(publisher);
+                            _doneEvent.Reset();
+                            Consume(subscriber);
+                        }
+                    }
                 }
             }
-
         }
 
         private static ICredentialsRefresher GetCredentialsRefresher()
@@ -78,18 +80,19 @@ namespace OAuth2
             publisher.ExchangeDeclare("test_direct", ExchangeType.Direct, true, false);
             return publisher;
         }
-        public static void publish(IChannel publisher)
+
+        public static void Publish(IChannel publisher)
         {
             const string message = "Hello World!";
-            ReadOnlyMemory<byte> body = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes(message));
+
+            var body = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes(message));
             var properties = new BasicProperties
             {
                 AppId = "oauth2",
             };
-            publisher.BasicPublish(exchange: _exchange,
-                                routingKey: "hello",
-                                basicProperties: properties,
-                                body: body);
+
+            publisher.BasicPublish(exchange: _exchange, routingKey: "hello", basicProperties: properties, body: body);
+
             Console.WriteLine("Sent message");
             publisher.WaitForConfirmsOrDieAsync().Wait();
             Console.WriteLine("Confirmed Sent message");
@@ -102,7 +105,8 @@ namespace OAuth2
             subscriber.QueueBind("testqueue", _exchange, "hello");
             return subscriber;
         }
-        public static void consume(IChannel subscriber)
+
+        public static void Consume(IChannel subscriber)
         {
             var asyncListener = new AsyncEventingBasicConsumer(subscriber);
             asyncListener.Received += AsyncListener_Received;
@@ -111,6 +115,7 @@ namespace OAuth2
             Console.WriteLine("Received message");
             subscriber.BasicCancel(consumerTag);
         }
+
         private static Task AsyncListener_Received(object sender, BasicDeliverEventArgs @event)
         {
             _doneEvent?.Set();
@@ -123,26 +128,26 @@ namespace OAuth2
             {
                 throw new ArgumentException("There are no OAuth2 Options");
             }
+
             if (options.ClientId == null)
             {
                 throw new ArgumentNullException("oauth2Options.ClientId is null");
             }
+
             if (options.TokenEndpoint == null)
             {
                 throw new ArgumentException("oauth2Options.TokenEndpoint is null");
             }
+
             Console.WriteLine("OAuth2Client ");
             Console.WriteLine("- ClientId: " + options.ClientId);
             Console.WriteLine("- ClientSecret: " + options.ClientSecret);
             Console.WriteLine("- TokenEndpoint: " + options.TokenEndpoint);
             Console.WriteLine("- Scope: " + options.Scope);
 
-            var oAuth2Client = new OAuth2ClientBuilder(options.ClientId, options.ClientSecret,
-                new Uri(options.TokenEndpoint))
-                //.SetScope("rabbitmq.configure:*/*, rabbitmq.read:*/*, rabbitmq.write:*/*")
-                .Build();
+            var tokenEndpointUri = new Uri(options.TokenEndpoint);
+            var oAuth2Client = new OAuth2ClientBuilder(options.ClientId, options.ClientSecret, tokenEndpointUri).Build();
             return new OAuth2ClientCredentialsProvider(options.Name, oAuth2Client);
         }
-
     }
 }
