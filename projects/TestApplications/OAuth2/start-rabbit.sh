@@ -1,54 +1,68 @@
 #!/usr/bin/env bash
 
-SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+set -o errexit
+set -o nounset
+set -o pipefail
 
-MODE=${MODE:-keycloak}
-IMAGE_TAG=${IMAGE_TAG:-3.11.15}
-IMAGE=${IMAGE:-rabbitmq}
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly script_dir
 
-function generate-ca-server-client-kpi {
-  NAME=$1
+readonly mode="${mode:-keycloak}"
+readonly image_tag="${IMAGE_TAG:-3-management}"
+readonly image="${IMAGE:-rabbitmq}"
 
-  if [ -d "$NAME" ]; then
-    echo "SSL Certificates already present under $NAME. Skip SSL generation"
-    return
-  fi
+function generate-ca-server-client-kpi
+{
+    local -r name="$1"
 
-  if [ ! -d "$SCRIPT/tls-gen" ]; then
-    git clone https://github.com/michaelklishin/tls-gen $SCRIPT/tls-gen
-  fi
+    if [[ -d $name ]]
+    then
+        echo "[INFO] SSL Certificates already present under $name. Skip SSL generation"
+        return
+    fi
 
-  echo "Generating CA and Server PKI under $NAMER ..."
-  mkdir -p $NAME
-  cp -r $SCRIPT/tls-gen/* $NAME
+    if [[ ! -d $script_dir/tls-gen ]]
+    then
+        git submodule update --init
+    fi
 
-  CUR_DIR=$(pwd)
-  cd $NAME/basic
-  make CN=localhost
-  make PASSWORD=$PASSWORD
-  make verify
-  make info
-  cd $CUR_DIR
+    echo "[INFO] Generating CA and Server PKI under $name ..."
+    mkdir -p "$name"
+    cp -r "$script_dir"/tls-gen/* "$name"
+
+    (
+        cd "$name/basic"
+        make CN=localhost
+        make "PASSWORD=$OAUTH2_CERT_PASSWORD"
+        make verify
+        make info
+    )
 }
 
-function deploy {
+function deploy
+{
+    local -r signing_key_file="$script_dir/$mode/signing-key/signing-key.pem"
+    if [[ -f $signing_key_file ]]
+    then
+        OAUTH2_RABBITMQ_EXTRA_MOUNTS="${OAUTH2_RABBITMQ_EXTRA_MOUNTS} -v ${signing_key_file}:/etc/rabbitmq/signing-key.pem"
+    fi
 
-  SIGNING_KEY_FILE=$SCRIPT/${MODE}/signing-key/signing-key.pem
-  if [ -f "$SIGNING_KEY_FILE" ]; then
-      EXTRA_MOUNTS="${EXTRA_MOUNTS} -v ${SIGNING_KEY_FILE}:/etc/rabbitmq/signing-key.pem"
-  fi
+    local -r mount_rabbitmq_config="/etc/rabbitmq/rabbitmq.conf"
+    local -r config_dir="$script_dir/$mode"
 
-  MOUNT_RABBITMQ_CONFIG="/etc/rabbitmq/rabbitmq.conf"
-  CONFIG_DIR=$SCRIPT/$MODE
+    docker network inspect rabbitmq_net >/dev/null 2>&1 || docker network create rabbitmq_net
+    docker rm -f rabbitmq 2>/dev/null || echo "[INFO]  rabbitmq was not running"
 
-  docker network inspect rabbitmq_net >/dev/null 2>&1 || docker network create rabbitmq_net
-  docker rm -f rabbitmq 2>/dev/null || echo "rabbitmq was not running"
-  echo "running RabbitMQ ($IMAGE:$IMAGE_TAG) with Idp $MODE and configuration file $CONFIG_DIR/rabbitmq.conf"
-  docker run -d --name rabbitmq --net rabbitmq_net \
-      -p 15672:15672 -p 5672:5672 ${EXTRA_PORTS}\
-      -v ${CONFIG_DIR}/rabbitmq.conf:${MOUNT_RABBITMQ_CONFIG}:ro \
-      -v ${SCRIPT}/enabled_plugins:/etc/rabbitmq/enabled_plugins \
-      -v ${CONFIG_DIR}:/conf ${EXTRA_MOUNTS} ${IMAGE}:${IMAGE_TAG}
+    echo "[INFO] running RabbitMQ ($image:$image_tag) with Idp $mode and configuration file $config_dir/rabbitmq.conf"
+
+    # Note:
+    # Variables left un-quoted so that words are actually split as args
+    # shellcheck disable=SC2086
+    docker run -d --name rabbitmq --net rabbitmq_net \
+        -p '15672:15672' -p '5672:5672' $OAUTH2_RABBITMQ_EXTRA_PORTS \
+        -v "$config_dir/rabbitmq.conf:$mount_rabbitmq_config:ro" \
+        -v "$script_dir/enabled_plugins:/etc/rabbitmq/enabled_plugins" \
+        -v "$config_dir:/conf" $OAUTH2_RABBITMQ_EXTRA_MOUNTS "$image:$image_tag"
 }
 
 deploy

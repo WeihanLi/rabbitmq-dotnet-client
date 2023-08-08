@@ -2,3 +2,6 @@
 	path = _site
 	url = https://github.com/rabbitmq/rabbitmq-dotnet-client.git
 	branch = gh-pages
+[submodule "projects/TestApplications/OAuth2/tls-gen"]
+	path = projects/TestApplications/OAuth2/tls-gen
+	url = https://github.com/rabbitmq/tls-gen.git
