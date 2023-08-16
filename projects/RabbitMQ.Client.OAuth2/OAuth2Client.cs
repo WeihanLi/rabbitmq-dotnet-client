@@ -36,7 +36,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
-namespace RabbitMQ.Client.Impl.OAuth2
+namespace RabbitMQ.Client.OAuth2
 {
     public interface IOAuth2Client
     {
@@ -139,6 +139,7 @@ namespace RabbitMQ.Client.Impl.OAuth2
             _additionalRequestParameters[param] = paramValue;
             return this;
         }
+
         public IOAuth2Client Build()
         {
             return new OAuth2Client(_clientId, _clientSecret, _tokenEndpoint,

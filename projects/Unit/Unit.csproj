@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../RabbitMQ.Client/RabbitMQ.Client.csproj" />
+    <ProjectReference Include="..\RabbitMQ.Client.OAuth2\RabbitMQ.Client.OAuth2.csproj" />
   </ItemGroup>
 
   <ItemGroup>

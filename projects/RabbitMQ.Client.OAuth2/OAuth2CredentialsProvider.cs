@@ -32,7 +32,7 @@
 using System;
 using System.Threading;
 
-namespace RabbitMQ.Client.Impl.OAuth2
+namespace RabbitMQ.Client.OAuth2
 {
     public class OAuth2ClientCredentialsProvider : ICredentialsProvider
     {

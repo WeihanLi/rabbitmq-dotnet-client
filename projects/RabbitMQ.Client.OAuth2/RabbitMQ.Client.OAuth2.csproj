@@ -63,4 +63,8 @@
     <PackageReference Include="System.Text.Json" Version="7.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RabbitMQ.Client\RabbitMQ.Client.csproj" />
+  </ItemGroup>
+
 </Project>

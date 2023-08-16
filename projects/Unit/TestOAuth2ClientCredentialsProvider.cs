@@ -30,7 +30,7 @@
 //---------------------------------------------------------------------------
 
 using Moq;
-using RabbitMQ.Client.Impl.OAuth2;
+using RabbitMQ.Client.OAuth2;
 using Xunit;
 
 namespace RabbitMQ.Client.Unit

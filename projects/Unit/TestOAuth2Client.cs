@@ -31,7 +31,7 @@
 
 using System.Net.Http;
 using System.Text.Json;
-using RabbitMQ.Client.Impl.OAuth2;
+using RabbitMQ.Client.OAuth2;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
